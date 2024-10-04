@@ -5,16 +5,19 @@ import ProductList from "./components/productList";
 import Paginate from "./components/pagination";
 
 /**
- * Fetches products from the API with pagination.
+ * Fetches products from the API with pagination and filtering.
  *
- * @param {number} skip - The number of products to skip.
- * @param {number} limit - The number of products to fetch.
- * @returns {Promise<Array>} - A promise that resolves to an array of products.
+ * @param {number} page - The current page number.
+ * @param {number} limit - The number of products to fetch per page.
+ * @param {string} searchTerm - The search term for filtering.
+ * @param {string} selectedCategory - The selected category for filtering.
+ * @param {string} sortOrder - The order to sort the products.
+ * @returns {Promise<Object>} - A promise that resolves to an object containing products and total count.
  * @throws {Error} - Throws an error if the fetch request fails.
  */
-const fetchProducts = async (skip = 0, limit = 20) => {
+const fetchProducts = async (page = 1, limit = 20, searchTerm = '', selectedCategory = '', sortOrder = 'default') => {
   const response = await fetch(
-    `https://next-ecommerce-api.vercel.app/products?skip=${skip}&limit=${limit}`,
+    `http://localhost:3000/api/products?page=${page}&limit=${limit}&search=${searchTerm}&category=${selectedCategory}&sort=${sortOrder}`,
     {
       cache: "force-cache",
       next: { revalidate: 60 },
@@ -25,55 +28,33 @@ const fetchProducts = async (skip = 0, limit = 20) => {
     throw new Error("Failed to fetch products");
   }
 
-  return response.json();
+  const data = await response.json();
+  console.log("Fetched Products:", data); // Log the data to see its structure
+
+  // Ensure data is an object with products and total count
+  if (!Array.isArray(data.products)) {
+    throw new Error("Expected an array of products");
+  }
+
+  return data; // Return the array of products
 };
 
 /**
- * Fetches unique categories from the products.
+ * Fetches categories from the API.
  *
- * @param {Array} products - The array of product objects.
- * @returns {Array} - An array of unique categories, with "All" included.
+ * @returns {Promise<Array>} - A promise that resolves to an array of categories.
+ * @throws {Error} - Throws an error if the fetch request fails.
  */
-const fetchCategories = (products) => {
-  const uniqueCategories = Array.from(
-    new Set(products.map((product) => product.category))
-  );
-  return ["All", ...uniqueCategories];
-};
+const fetchCategories = async () => {
+  const response = await fetch('http://localhost:3000/api/categories'); // Adjust the API endpoint as necessary
+  if (!response.ok) {
+    throw new Error("Failed to fetch categories");
+  }
 
-/**
- * Filters products based on the search term and selected category.
- *
- * @param {Array} products - The array of product objects.
- * @param {string} searchTerm - The search term for filtering.
- * @param {string} selectedCategory - The selected category for filtering.
- * @returns {Array} - An array of filtered products.
- */
-const filterProducts = (products, searchTerm, selectedCategory) => {
-  return products.filter((product) => {
-    const matchesSearch = product.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "All" || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-};
+  const data = await response.json();
+  console.log("Fetched Categories:", data); // Log the categories to see their structure
 
-/**
- * Sorts products based on the specified sort order.
- *
- * @param {Array} products - The array of product objects.
- * @param {string} sortOrder - The order to sort the products (e.g., "lowToHigh", "highToLow").
- * @returns {Array} - An array of sorted products.
- */
-
-const sortProducts = (products, sortOrder) => {
-  return products.sort((a, b) => {
-    if (sortOrder === "lowToHigh") return a.price - b.price;
-    if (sortOrder === "highToLow") return b.price - a.price;
-    return 0; // Default sorting
-  });
+  return data; // Return the array of categories
 };
 
 /**
@@ -86,43 +67,36 @@ const sortProducts = (products, sortOrder) => {
 const Home = async ({ searchParams }) => {
   const page = parseInt(searchParams.page, 10) || 1;
   const limit = 20; 
-  const skip = (page - 1) * limit; 
-
-  // Extract search, filter, and sort parameters from the query
   const searchTerm = searchParams.search || ""; // Get search term from URL
   const selectedCategory = searchParams.category || "All";
   const sortOrder = searchParams.sort || "default";
 
-  const products = await fetchProducts(skip, limit); // Fetch products with pagination
-  const categories = fetchCategories(products); // Fetch categories based on products
+  // Fetch products with pagination and filters
+  const { products, totalCount } = await fetchProducts(page, limit, searchTerm, selectedCategory, sortOrder);
 
-  // Filter and sort products
-  const filteredProducts = filterProducts(
-    products,
-    searchTerm,
-    selectedCategory
-  );
-  const sortedProducts = sortProducts(filteredProducts, sortOrder);
+  // Fetch categories for the filter
+  const categories = await fetchCategories();
 
   return (
     <div>
-      <Search initialSearchTerm={searchParams.search} />
+      <Search initialSearchTerm={searchTerm} />
       <div className="flex justify-center mt-10 space-x-2">
-        <Filter categories={categories} selectedCategory={selectedCategory} />
+        <Filter categories={categories} selectedCategory={selectedCategory} /> {/* Pass fetched categories */}
         <Sort sortOrder={sortOrder} />
         <a
           href="/?page=1" // Adjust the URL to reset filters
-          className="inline-block bg-white text-black rounded border border-gray-300 rounded-lg h-6 w-13 text-center px-3 focus:outline-none focus:border-orange-500'"
+          className="inline-block bg-white text-black rounded border border-gray-300 h-6 w-13 text-center px-3 focus:outline-none focus:border-orange-500"
         >
           Reset Filters
         </a>
       </div>
 
-      <ProductList products={sortedProducts} searchParams={searchParams} />
+      {/* Render the ProductList component */}
+      <ProductList products={products} searchParams={searchParams} /> 
 
       <Paginate
         currentPage={page}
-        totalProducts={194}
+        totalProducts={totalCount} // Pass the total count of products for pagination
         productsPerPage={limit}
       />
     </div>
