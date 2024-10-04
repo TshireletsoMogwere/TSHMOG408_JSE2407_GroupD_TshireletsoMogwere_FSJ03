@@ -1,17 +1,31 @@
-import { db } from '../../firebase'; 
+import { firestore } from "@/lib/firebase"; // Adjust the import according to your Firebase configuration
+import { NextResponse } from "next/server";
 
-export default async function handler(req, res) {
-  const { id } = req.query;
+/**
+ * @param {GET updated Product} request
+ * @param {Using it id} param1
+ */
+
+export async function GET(_request, { params }) {
+  const { id } = params;
 
   try {
-    const productDoc = await db.collection('products').doc(id).get();
+    // Reference to the specific product document by ID
+    const productRef = firestore.collection('products').doc(id);
+    
+    // Fetch the product document
+    const doc = await productRef.get();
 
-    if (!productDoc.exists) {
-      return res.status(404).json({ message: 'Product not found' });
+    // Check if the document exists
+    if (!doc.exists) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    res.status(200).json({ id: productDoc.id, ...productDoc.data() });
+    // Return the product data
+    const product = { id: doc.id, ...doc.data() };
+    return NextResponse.json({ product }, { status: 200 });
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving product', error });
+    console.error(error);
+    return NextResponse.json({ error: 'Failed to load product' }, { status: 500 });
   }
 }

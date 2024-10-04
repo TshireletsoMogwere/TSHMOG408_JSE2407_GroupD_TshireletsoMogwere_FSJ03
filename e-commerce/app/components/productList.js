@@ -42,7 +42,7 @@ const ProductList = ({ products, searchParams }) => {
                   query: searchParams,
                 }}
               >
-                <Image src={Info} alt="info" />
+                <Image src={Info} alt="info" className="w-6" />
               </Link>
             </div>
           </div>
