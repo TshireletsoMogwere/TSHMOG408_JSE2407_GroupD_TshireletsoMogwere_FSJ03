@@ -1,4 +1,4 @@
-import { db } from '../../firebase'; // Adjust the import based on your file structure
+import { db } from '../../firebase'; 
 
 export default async function handler(req, res) {
   try {

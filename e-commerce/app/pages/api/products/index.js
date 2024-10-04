@@ -1,7 +1,7 @@
-import { db } from "../../lib/firebase"; // Adjust the path as necessary
+import { db } from "../../lib/firebase"; 
 
 // Define a maximum limit for product queries
-const MAX_LIMIT = 100; // You can set this value according to your needs
+const MAX_LIMIT = 100; 
 
 export default async function handler(req, res) {
   const { page = 1, limit = 20, search = '', category = 'All', sort = 'default' } = req.query;

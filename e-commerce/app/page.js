@@ -15,9 +15,9 @@ import Paginate from "./components/pagination";
  * @returns {Promise<Object>} - A promise that resolves to an object containing products and total count.
  * @throws {Error} - Throws an error if the fetch request fails.
  */
-const fetchProducts = async (page = 1, limit = 20, searchTerm = '', selectedCategory = '', sortOrder = 'default') => {
+const fetchProducts = async () => {
   const response = await fetch(
-    `http://localhost:3000/api/products?page=${page}&limit=${limit}&search=${searchTerm}&category=${selectedCategory}&sort=${sortOrder}`,
+    `http://localhost:3000/api/products`,
     {
       cache: "force-cache",
       next: { revalidate: 60 },
@@ -53,8 +53,7 @@ const fetchCategories = async () => {
 
   const data = await response.json();
   console.log("Fetched Categories:", data); // Log the categories to see their structure
-
-  return data; // Return the array of categories
+  return ["All", ...data]; // Prepend "All" to the categories array
 };
 
 /**
