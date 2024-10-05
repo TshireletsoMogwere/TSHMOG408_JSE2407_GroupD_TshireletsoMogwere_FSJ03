@@ -1,7 +1,8 @@
+"use client"
 // import Search from "./components/searchBar";
-// import Filter from "./components/filter";
+import CategoryList from "./components/filter";
 // import Sort from "./components/sort";
-// import ProductList from "./components/productList";
+import ProductList from "./components/productList";
 // import Paginate from "./components/pagination";
 
 // /**
@@ -118,15 +119,33 @@ export const getProducts = async () => {
   }
 };
 
+const getCategories = async () => {
+  try {
+    const res = await fetch("http://localhost:3000/api/categories"); // Ensure your API route is correct
+    if (!res.ok) {
+      throw new Error("Failed to fetch categories");
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch categories:", error);
+    return [];
+  }
+};
+
+const handleCategorySelect = (category) => {
+  setSelectedCategory(category);
+  getProducts(category); // Fetch products filtered by the selected category
+};
+
 const page = async () => {
   const products = await getProducts();
+  const categories = await getCategories();
   return (
     <>
-    <h1>Products</h1>
-    {products.map((product) => (
-      <li key={product.id}>{product.title}</li>
-    )
-  )}
+   <CategoryList categories={categories}  onCategorySelect={handleCategorySelect}  />
+      <ProductList products={products}  /> 
+     
     </>
   )
 }
