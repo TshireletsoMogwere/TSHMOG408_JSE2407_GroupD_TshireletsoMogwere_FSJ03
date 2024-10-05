@@ -197,3 +197,4 @@ export default function ProductDetails({ params, searchParams }) {
     
   );
 }
+
