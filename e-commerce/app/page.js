@@ -200,16 +200,17 @@ export default function Home() {
       {/* Filter by Category */}
       <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
   <option value="">All Categories</option>
-  {categories.length > 0 ? (
-    categories.map((category) => (
-      <option key={category.id} value={category.id}>
-        {category.category}
+  {categories.length === 0 ? (
+    <option disabled>No categories available</option>
+  ) : (
+    categories.map((category, index) => (
+      <option key={index} value={category.name}>
+        {category.name} {/* Use the name field */}
       </option>
     ))
-  ) : (
-    <option disabled>No Categories Available</option>
   )}
 </select>
+
 
 
       {/* Sort by Price */}
