@@ -1,6 +1,7 @@
-import { collection, query, orderBy, limit, startAt, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, startAfter, getDocs } from 'firebase/firestore';
 import { db } from '@/app/lib/firebase';
 import { NextResponse } from 'next/server';
+import Fuse from 'fuse.js';
 
 export async function GET(request) {
   try {
@@ -10,6 +11,7 @@ export async function GET(request) {
     const category = searchParams.get('category');
     const sortBy = searchParams.get('sortBy') || 'price';
     const sortOrder = searchParams.get('sortOrder') || 'asc';
+    const search = searchParams.get('search') || '';
 
     let productsQuery = collection(db, 'products');
 
@@ -21,21 +23,33 @@ export async function GET(request) {
     // Apply sorting
     productsQuery = query(productsQuery, orderBy(sortBy, sortOrder));
 
-    // Pagination logic using `startAt` instead of `startAfter` for numeric pagination
-    const offset = (page - 1) * pageSize;
-    productsQuery = query(productsQuery, limit(pageSize), startAt(offset));
-
-    const productsSnapshot = await getDocs(productsQuery);
-    const products = productsSnapshot.docs.map(doc => ({
+    // Fetch products without pagination for Fuse search
+    const allProductsSnapshot = await getDocs(productsQuery);
+    const allProducts = allProductsSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
 
+    // Use Fuse.js for searching
+    let products = allProducts;
+    if (search) {
+      const fuse = new Fuse(allProducts, {
+        keys: ['title'], 
+        threshold: 0.3,
+      });
+      const searchResults = fuse.search(search);
+      products = searchResults.map(result => result.item);
+    }
+
+    // Pagination logic
+    const startIndex = (page - 1) * pageSize;
+    const paginatedProducts = products.slice(startIndex, startIndex + pageSize);
+
     // Determine if there are more products
-    const hasMore = products.length === pageSize;
+    const hasMore = paginatedProducts.length === pageSize;
 
     return NextResponse.json({
-      products,
+      products: paginatedProducts,
       page,
       pageSize,
       hasMore,
