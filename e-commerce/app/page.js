@@ -105,13 +105,11 @@
 // };
 
 // export default Home;
-
 'use client';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import axios from 'axios';
 import Link from 'next/link';
-import Info from './assets/info.png'
+import Info from './assets/info.png';
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -123,12 +121,17 @@ export default function Home() {
   const [pageSize, setPageSize] = useState(20);
   const [hasMore, setHasMore] = useState(true);
   const [totalPages, setTotalPages] = useState(1);  // Total number of pages
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/api/categories');
-        console.log('Categories fetched:', res.data); // Check the API response here
-        setCategories(res.data);
+        const res = await fetch('https://digitizemart.vercel.app/api/categories');
+        if (!res.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await res.json();
+        console.log('Categories fetched:', data); // Check the API response here
+        setCategories(data);
       } catch (error) {
         console.error('Failed to fetch categories:', error);
       }
@@ -136,26 +139,34 @@ export default function Home() {
   
     fetchCategories();
   }, []);
-  
 
   useEffect(() => {
     // Fetch products when filters change or page changes
     const fetchProducts = async () => {
       try {
-        const params = {
+        const params = new URLSearchParams({
           page,
           pageSize,
           search: searchTerm,
           category: selectedCategory,
           sortBy: 'price',  // Sorting by price
           sortOrder,
-        };
-        const res = await axios.get('http://localhost:3000/api/products', { params });
+        }).toString();
 
-        setProducts(res.data.products);  // Reset products on new page
-        setHasMore(res.data.hasMore);
+        const res = await fetch(`https://digitizemart.vercel.app/api/products?${params}`, {
+          method: 'GET',
+          mode: 'no-cors',
+        });
+        
+        if (!res.ok) {
+          throw new Error('Network response was not ok');
+        }
+        
+        const data = await res.json();
+        setProducts(data.products);  // Reset products on new page
+        setHasMore(data.hasMore);
        
-        const totalProducts = res.data.totalProducts || 194; // Set a default or get it from API
+        const totalProducts = data.totalProducts || 194; // Set a default or get it from API
         setTotalPages(Math.ceil(totalProducts / pageSize));  // Calculate total pages
       } catch (error) {
         console.error('Failed to fetch products:', error);
@@ -199,19 +210,17 @@ export default function Home() {
 
       {/* Filter by Category */}
       <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
-  <option value="">All Categories</option>
-  {categories.length === 0 ? (
-    <option disabled>No categories available</option>
-  ) : (
-    categories.map((category, index) => (
-      <option key={index} value={category.name}>
-        {category.name} {/* Use the name field */}
-      </option>
-    ))
-  )}
-</select>
-
-
+        <option value="">All Categories</option>
+        {categories.length === 0 ? (
+          <option disabled>No categories available</option>
+        ) : (
+          categories.map((category, index) => (
+            <option key={index} value={category.name}>
+              {category.name} {/* Use the name field */}
+            </option>
+          ))
+        )}
+      </select>
 
       {/* Sort by Price */}
       <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
@@ -223,23 +232,22 @@ export default function Home() {
       <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4 mt-10">
         {products.map((product) => (
           <div key={product.id} className="p-4 shadow-md rounded-lg overflow-hidden cursor-pointer transition-transform hover:scale-105">
-             <p className="text-orange-600 text-md italic font-medium">
+            <p className="text-orange-600 text-md italic font-medium">
               {product.category}
-           </p>
+            </p>
             <div className="h-48 flex items-center justify-center">
               <Image src={product.thumbnail} alt={product.title} width={200} height={200} />
             </div>
             <h2 className="text-lg font-bold">{product.title}</h2>
             <div className="text-md text-orange-600 font-semibold mt-2 flex items-center justify-between">
-            <span>€{product.price}</span>
+              <span>€{product.price}</span>
               <Link
-               href={{
-                 pathname: `/product/${product.id}`,
-                
-               }}
+                href={{
+                  pathname: `/product/${product.id}`,
+                }}
               >
-              <Image src={Info} alt="info" className="w-6" />
-             </Link>
+                <Image src={Info} alt="info" className="w-6" />
+              </Link>
             </div>
           </div>
         ))}

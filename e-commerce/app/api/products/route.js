@@ -2,8 +2,15 @@ import { collection, query, where, orderBy, limit, startAfter, getDocs } from 'f
 import { db } from '@/app/lib/firebase';
 import { NextResponse } from 'next/server';
 import Fuse from 'fuse.js';
+import runCors from '@/app/lib/cors'; 
 
 export async function GET(request) {
+   // Run the CORS middleware
+   const headers = new Headers();
+  headers.set('Access-Control-Allow-Origin', 'https://digitizemart.vercel.app/api/products'); // Your frontend origin
+  headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page')) || 1;
