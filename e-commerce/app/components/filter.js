@@ -39,22 +39,31 @@
 
 // export default Filter;
 
+export default function CategoryList({ categories, selectedCategory, onCategorySelect }) {
+  // Ensure categories is always an array
+  const safeCategories = Array.isArray(categories) ? categories : [];
 
-const CategoryList = ({ categories }) => {
   return (
-    <div>
-      <h2>Categories</h2>
-      {categories.length > 0 ? (
-        <ul>
-          {categories.map((category) => (
-            <li key={category.id}>{category}</li>
-          ))}
-        </ul>
-      ) : (
-        <p>No categories available</p>
-      )}
+    <div className="flex flex-wrap gap-2 mb-4">
+      <button
+        className={`px-4 py-2 rounded ${
+          !selectedCategory ? 'bg-blue-500 text-white' : 'bg-gray-200'
+        }`}
+        onClick={() => onCategorySelect(null)}
+      >
+        All
+      </button>
+      {safeCategories.map((category) => (
+        <button
+          key={category.id}
+          className={`px-4 py-2 rounded ${
+            selectedCategory === category.id ? 'bg-blue-500 text-white' : 'bg-gray-200'
+          }`}
+          onClick={() => onCategorySelect(category.id)}
+        >
+          {category.name}
+        </button>
+      ))}
     </div>
   );
-};
-
-export default CategoryList;
+}

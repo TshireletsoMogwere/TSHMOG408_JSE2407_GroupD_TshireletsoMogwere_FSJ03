@@ -1,8 +1,8 @@
-"use client"
+// "use client"
 // import Search from "./components/searchBar";
-import CategoryList from "./components/filter";
+// import CategoryList from "./components/filter";
 // import Sort from "./components/sort";
-import ProductList from "./components/productList";
+// import ProductList from "./components/productList";
 // import Paginate from "./components/pagination";
 
 // /**
@@ -106,48 +106,148 @@ import ProductList from "./components/productList";
 
 // export default Home;
 
-export const getProducts = async () => {
-  try {
-    const res = await fetch("http://localhost:3000/api/products")
-    if (!res) {
-      throw new ErrorBoundary("Failed to fetch")
+'use client';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import axios from 'axios';
+import Link from 'next/link';
+import Info from './assets/info.png'
+
+export default function Home() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc');  // Default to 'asc' for low to high
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);  // Total number of pages
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await axios.get('http://localhost:3000/api/categories');
+        console.log('Categories fetched:', res.data); // Check the API response here
+        setCategories(res.data);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      }
+    };
+  
+    fetchCategories();
+  }, []);
+  
+
+  useEffect(() => {
+    // Fetch products when filters change or page changes
+    const fetchProducts = async () => {
+      try {
+        const params = {
+          page,
+          pageSize,
+          search: searchTerm,
+          category: selectedCategory,
+          sortBy: 'price',  // Sorting by price
+          sortOrder,
+        };
+        const res = await axios.get('http://localhost:3000/api/products', { params });
+
+        setProducts(res.data.products);  // Reset products on new page
+        setHasMore(res.data.hasMore);
+       
+        const totalProducts = res.data.totalProducts || 194; // Set a default or get it from API
+        setTotalPages(Math.ceil(totalProducts / pageSize));  // Calculate total pages
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      }
+    };
+
+    fetchProducts();
+  }, [page, searchTerm, selectedCategory, sortOrder, pageSize]);
+
+  const handlePageClick = (pageNumber) => {
+    setPage(pageNumber);  // Update the page when a number is clicked
+  };
+
+  const renderPagination = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(
+        <button
+          key={i}
+          onClick={() => handlePageClick(i)}
+          className={`px-3 py-1 ${page === i ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}
+        >
+          {i}
+        </button>
+      );
     }
-    const data = await res.json();
-    return data;
-  } catch(error) {
-    console.error("failed to fetch", error)
-  }
-};
+    return pageNumbers;
+  };
 
-const getCategories = async () => {
-  try {
-    const res = await fetch("http://localhost:3000/api/categories"); // Ensure your API route is correct
-    if (!res.ok) {
-      throw new Error("Failed to fetch categories");
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error("Failed to fetch categories:", error);
-    return [];
-  }
-};
-
-const handleCategorySelect = (category) => {
-  setSelectedCategory(category);
-  getProducts(category); // Fetch products filtered by the selected category
-};
-
-const page = async () => {
-  const products = await getProducts();
-  const categories = await getCategories();
   return (
-    <>
-   <CategoryList categories={categories}  onCategorySelect={handleCategorySelect}  />
-      <ProductList products={products}  /> 
-     
-    </>
-  )
-}
-export default page
+    <div>
+      <h1>Product Store</h1>
 
+      {/* Search */}
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="Search products..."
+      />
+
+      {/* Filter by Category */}
+      <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+  <option value="">All Categories</option>
+  {categories.length > 0 ? (
+    categories.map((category) => (
+      <option key={category.id} value={category.id}>
+        {category.category}
+      </option>
+    ))
+  ) : (
+    <option disabled>No Categories Available</option>
+  )}
+</select>
+
+
+      {/* Sort by Price */}
+      <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+        <option value="asc">Price: Low to High</option>
+        <option value="desc">Price: High to Low</option>
+      </select>
+
+      {/* Product List */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4 mt-10">
+        {products.map((product) => (
+          <div key={product.id} className="p-4 shadow-md rounded-lg overflow-hidden cursor-pointer transition-transform hover:scale-105">
+             <p className="text-orange-600 text-md italic font-medium">
+              {product.category}
+           </p>
+            <div className="h-48 flex items-center justify-center">
+              <Image src={product.thumbnail} alt={product.title} width={200} height={200} />
+            </div>
+            <h2 className="text-lg font-bold">{product.title}</h2>
+            <div className="text-md text-orange-600 font-semibold mt-2 flex items-center justify-between">
+            <span>€{product.price}</span>
+              <Link
+               href={{
+                 pathname: `/product/${product.id}`,
+                
+               }}
+              >
+              <Image src={Info} alt="info" className="w-6" />
+             </Link>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination */}
+      <div className="pagination mt-4">
+        {renderPagination()}
+      </div>
+    </div>
+  );
+}
