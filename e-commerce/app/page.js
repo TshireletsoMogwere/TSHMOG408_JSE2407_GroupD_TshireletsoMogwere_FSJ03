@@ -108,20 +108,22 @@
 'use client';
 import { useEffect, useState } from 'react';
 import ImageCarousel from './components/imageCarousel';
-import Info from "../app/assets/info.png"
+import Info from "../app/assets/info.png";
 import Link from 'next/link';
 import Image from 'next/image';
+import SkeletonLoader from './components/productsSkeleton'; // Import your Skeleton Loader
 
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [sortOrder, setSortOrder] = useState(''); // No default sorting
+  const [sortOrder, setSortOrder] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [hasMore, setHasMore] = useState(true);
-  const [totalProducts, setTotalProducts] = useState(0); // New state to track total products
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [loading, setLoading] = useState(true); // New loading state
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -139,29 +141,34 @@ export default function Home() {
     fetchCategories();
   }, []);
 
-   
-
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true); // Set loading to true before fetching
       const params = new URLSearchParams({
         page,
         pageSize,
         search: searchTerm,
         category: selectedCategory,
-        ...(sortOrder && { sortBy: 'price', sortOrder }), // Apply sorting only if sortOrder is defined
+        ...(sortOrder && { sortBy: 'price', sortOrder }),
       }).toString();
 
-      const res = await fetch(`http://localhost:3000/api/products?${params}`);
-      const data = await res.json();
-      setProducts(data.products);
-      setTotalProducts(data.total); // Update total products from API response
-      setHasMore(data.hasMore);
+      try {
+        const res = await fetch(`http://localhost:3000/api/products?${params}`);
+        const data = await res.json();
+        setProducts(data.products);
+        setTotalProducts(data.total);
+        setHasMore(data.hasMore);
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
+      }
     };
 
     fetchProducts();
   }, [page, searchTerm, selectedCategory, sortOrder, pageSize]);
 
-  const totalPages = Math.ceil(totalProducts / pageSize); // Calculate total pages
+  const totalPages = Math.ceil(totalProducts / pageSize);
 
   const handlePageClick = (pageNumber) => {
     setPage(pageNumber);
@@ -210,37 +217,40 @@ export default function Home() {
       </select>
 
       <div className='grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4 mt-10'>
-        {products.map(product => (
-          <div key={product.id} className='p-4 shadow-md rounded-lg overflow-hidden cursor-pointer transition-transform hover:scale-105'>
+        {loading ? ( // Conditional rendering for loading
+          Array.from({ length: 10 }).map((_, index) => (
+            <SkeletonLoader key={index} />
+          ))
+        ) : (
+          products.map(product => (
+            <div key={product.id} className='p-4 shadow-md rounded-lg overflow-hidden cursor-pointer transition-transform hover:scale-105'>
               <p className="text-orange-600 text-md italic font-medium">
-              {product.category}
-            </p>
-            <div className="h-48 flex items-center justify-center">
-               <ImageCarousel
-                 images={product.images}
-                 thumbnail={product.thumbnail}
-                
-               />
+                {product.category}
+              </p>
+              <div className="h-48 flex items-center justify-center">
+                <ImageCarousel
+                  images={product.images}
+                  thumbnail={product.thumbnail}
+                />
+              </div>
+              <h2 className="text-lg font-bold">{product.title}</h2>
+              <div className="text-md text-orange-600 font-semibold mt-2 flex items-center justify-between">
+                <span>€{product.price}</span>
+                <Link
+                  href={{
+                    pathname: `/product/${product.id}`,
+                  }}
+                >
+                  <Image src={Info} alt="info" className="w-6" />
+                </Link>
+              </div>
             </div>
-            <h2 className="text-lg font-bold">{product.title}</h2>
-            <div className="text-md text-orange-600 font-semibold mt-2 flex items-center justify-between">
-              <span>€{product.price}</span>
-              <Link
-                href={{
-                   pathname: `/product/${product.id}`,
-                
-                }}
-              >
-                <Image src={Info} alt="info" className="w-6" />
-              </Link>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
-      {/* Pagination logic here */}
       <div className="pagination mt-4">
-        {totalPages > 1 && renderPagination()} {/* Only show pagination if there are multiple pages */}
+        {totalPages > 1 && renderPagination()}
       </div>
     </div>
   );
