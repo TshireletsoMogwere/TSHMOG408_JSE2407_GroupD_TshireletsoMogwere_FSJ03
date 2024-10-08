@@ -125,7 +125,7 @@ export default function Home() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/categories');
+        const res = await fetch('https://digitizemart.vercel.app/api/categories');
         if (!res.ok) {
           throw new Error('Network response was not ok');
         }
@@ -153,7 +153,7 @@ export default function Home() {
           sortOrder,
         }).toString();
 
-        const res = await fetch(`http://localhost:3000/api/products?${params}`, {
+        const res = await fetch(`https://digitizemart.vercel.app/api/products?${params}`, {
           method: 'GET',
          
         });
