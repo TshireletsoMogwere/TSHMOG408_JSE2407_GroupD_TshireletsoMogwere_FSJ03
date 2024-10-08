@@ -11,7 +11,6 @@ const SignUpForm = ({ signup }) => {
 
     try {
       await signup(email, password);
-      // Handle successful signup (e.g., redirect to profile page)
     } catch (err) {
       setError(err.message);
     }

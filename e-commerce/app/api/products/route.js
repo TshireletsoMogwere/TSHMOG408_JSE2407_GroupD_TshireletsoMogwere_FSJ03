@@ -1,18 +1,16 @@
-import { collection, query, where, orderBy, limit, startAfter, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '@/app/lib/firebase';
 import { NextResponse } from 'next/server';
 import Fuse from 'fuse.js';
 
-
 export async function GET(request) {
-
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page')) || 1;
     const pageSize = parseInt(searchParams.get('pageSize')) || 10;
     const category = searchParams.get('category');
-    const sortBy = searchParams.get('sortBy') || 'price';
-    const sortOrder = searchParams.get('sortOrder') || 'asc';
+    const sortBy = searchParams.get('sortBy'); // No default
+    const sortOrder = searchParams.get('sortOrder'); // No default
     const search = searchParams.get('search') || '';
 
     let productsQuery = collection(db, 'products');
@@ -22,10 +20,12 @@ export async function GET(request) {
       productsQuery = query(productsQuery, where('categoryId', '==', category));
     }
 
-    // Apply sorting
-    productsQuery = query(productsQuery, orderBy(sortBy, sortOrder));
+    // Apply sorting only if sortBy and sortOrder are provided
+    if (sortBy && sortOrder) {
+      productsQuery = query(productsQuery, orderBy(sortBy, sortOrder));
+    }
 
-    // Fetch products without pagination for Fuse search
+    // Fetch products
     const allProductsSnapshot = await getDocs(productsQuery);
     const allProducts = allProductsSnapshot.docs.map(doc => ({
       id: doc.id,
@@ -52,6 +52,7 @@ export async function GET(request) {
 
     return NextResponse.json({
       products: paginatedProducts,
+      total: allProducts.length,
       page,
       pageSize,
       hasMore,
