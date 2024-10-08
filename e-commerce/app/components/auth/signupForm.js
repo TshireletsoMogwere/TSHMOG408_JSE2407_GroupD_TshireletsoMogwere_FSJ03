@@ -1,18 +1,20 @@
 import { useState } from 'react';
+import useAuth from '@/app/hooks/useAuth';
 
-const SignUpForm = ({ signup }) => {
+const SignUpForm = () => {
+  const { signup, error } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
     try {
       await signup(email, password);
+      alert('Successfully signed up!'); // Alert on successful signup
+      setEmail('');
+      setPassword('');
     } catch (err) {
-      setError(err.message);
+      console.error(err);
     }
   };
 
@@ -33,7 +35,7 @@ const SignUpForm = ({ signup }) => {
         required
       />
       <button type="submit">Sign Up</button>
-      {error && <p>{error}</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>} {/* Display error message */}
     </form>
   );
 };

@@ -1,19 +1,22 @@
 import { useState } from 'react';
+import useAuth from '@/app/hooks/useAuth';
 
-const SignInForm = ({ signin }) => {
+const SignInForm = () => {
+  const { signin, error } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
     try {
       await signin(email, password);
-      // Handle successful signin (e.g., redirect to home page)
+      alert('Successfully signed in!'); // Alert on successful signin
+      // Optionally reset form fields
+      setEmail('');
+      setPassword('');
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      // Handle error (optional, since it's already set in useAuth)
     }
   };
 
@@ -34,7 +37,7 @@ const SignInForm = ({ signin }) => {
         required
       />
       <button type="submit">Sign In</button>
-      {error && <p>{error}</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>} {/* Display error message */}
     </form>
   );
 };

@@ -15,7 +15,7 @@ const getProducts = async (category = 'all') => {
         return data;
     } catch (error) {
         console.error("Failed to fetch products", error);
-        return { products: [] }; // Ensure that it returns an empty array on failure
+        return { products: [] }; 
     }
 };
 
