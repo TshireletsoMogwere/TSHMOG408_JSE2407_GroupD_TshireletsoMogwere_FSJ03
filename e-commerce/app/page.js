@@ -155,7 +155,7 @@ export default function Home() {
 
         const res = await fetch(`http://localhost:3000/api/products?${params}`, {
           method: 'GET',
-          mode: 'no-cors',
+         
         });
         
         if (!res.ok) {
