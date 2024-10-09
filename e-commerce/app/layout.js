@@ -33,7 +33,7 @@ export function getMetadata(productTitle) {
  * @param {string} [props.productTitle=""] - The title of the product for metadata.
  * @returns {JSX.Element} - The rendered root layout.
  */
-export default function RootLayout({ children, productTitle = "" }) {
+export default function RootLayout({ children, productTitle = "", showHeader }) {
   const metadata = getMetadata(productTitle);
 
   return (
@@ -47,7 +47,8 @@ export default function RootLayout({ children, productTitle = "" }) {
         <link rel="manifest" href={metadata.manifest} />
       </head>
       <body className={inter.className}>
-        <Header />
+        {showHeader && 
+        <Header />}
         {children}
       </body>
     </html>

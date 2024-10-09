@@ -1,21 +1,27 @@
+import { NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { db } from '../../../lib/firebase';
 
-export default async function handler(req, res) {
-  if (req.method === 'DELETE') {
-    const { reviewId, productId } = req.body;
+export async function DELETE(req) {
+  // Parse the request body
+  const { reviewId, productId } = await req.json();
 
-    try {
-      const idToken = req.headers.authorization.split('Bearer ')[1];
-      const user = await getAuth().verifyIdToken(idToken);
-
-      const reviewRef = db.collection('products').doc(productId).collection('reviews').doc(reviewId);
-      await reviewRef.delete();
-      return res.status(200).json({ message: 'Review deleted successfully.' });
-    } catch (error) {
-      return res.status(500).json({ error: 'Failed to delete review.' });
+  try {
+    // Verify the ID token from the request headers
+    const idToken = req.headers.get('Authorization')?.split('Bearer ')[1];
+    if (!idToken) {
+      return NextResponse.json({ error: 'Authorization token missing.' }, { status: 401 });
     }
-  }
 
-  return res.status(405).json({ error: 'Method not allowed' });
+    const user = await getAuth().verifyIdToken(idToken);
+
+    // Reference to the review document to delete
+    const reviewRef = db.collection('products').doc(productId).collection('reviews').doc(reviewId);
+    await reviewRef.delete();
+
+    return NextResponse.json({ message: 'Review deleted successfully.' }, { status: 200 });
+  } catch (error) {
+    console.error('Error deleting review:', error);
+    return NextResponse.json({ error: 'Failed to delete review.' }, { status: 500 });
+  }
 }

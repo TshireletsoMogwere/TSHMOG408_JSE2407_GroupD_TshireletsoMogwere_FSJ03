@@ -1,4 +1,4 @@
-// app/utils/fetchData.js
+
 const API_URL = 'http://localhost:3000/api';
 
 export const fetchCategories = async () => {

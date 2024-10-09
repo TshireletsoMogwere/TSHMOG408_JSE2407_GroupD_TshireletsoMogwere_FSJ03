@@ -1,7 +1,7 @@
 import { getAuth } from 'firebase-admin/auth';
 import { db } from '../../../lib/firebase';
 
-export default async function handler(req, res) {
+export default async function GET(req, res) {
   if (req.method === 'PUT') {
     const { reviewId, productId, rating, comment } = req.body;
 
