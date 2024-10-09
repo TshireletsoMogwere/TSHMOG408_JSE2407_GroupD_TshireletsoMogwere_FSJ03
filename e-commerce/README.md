@@ -8,6 +8,12 @@ This is an E-commerce Store project designed as a web application to allow users
 
 **Technologies Used**
 
+- **Firebase**: a comprehensive platform developed by Google that provides a suite of tools and services for building, managing, and scaling web and mobile applications. It aims to simplify the development process and enhance the functionality of apps, allowing developers to focus on building features rather than managing infrastructure. 
+
+- **Authentication**: the process of verifying the identity of a user or system attempting to access a resource or service. It ensures that the person or entity is who they claim to be before granting access to sensitive information or functionalities. Authentication is a crucial aspect of security in computing, particularly in web applications, mobile apps, and network systems.
+
+- **Progressive Web App (PWA) with offline capabilities**: a web application designed to function seamlessly even when users are not connected to the internet. This capability is a core feature of PWAs, allowing them to deliver a reliable and engaging user experience regardless of network conditions.
+
 - **Next.js**: An open-source web development framework created by the private company Vercel providing React-based web applications with server-side rendering and  
    static website generation.
 
@@ -29,7 +35,7 @@ This is an E-commerce Store project designed as a web application to allow users
 - **Git**: A version control system used to track changes in the source code during development. It allows multiple developers to collaborate and maintain a history of code changes.
 
 - **GitHub**: A web-based platform for version control and collaboration, hosting the source code repository and facilitating project management and issue tracking.
- 
+
 **Setup Instructions**
 
 # Prerequisites
@@ -66,6 +72,10 @@ Make sure to replace `<repository-url>` and `<project-directory>` with the actua
 6. **Sorting by price**: click the `Default` button to sort according to the price.
 
 7. **Reseting**: click the `Reset Filters` to default the products sort, search and filtering.
+
+9. **Authentication**: toggle the user icon in the header to view the form of signing in and signing up. 
+
+8. **Reviews**: to add, edit or delete a review sign in/sign up first and navigate to product details.
 
 **Contributing**
 
