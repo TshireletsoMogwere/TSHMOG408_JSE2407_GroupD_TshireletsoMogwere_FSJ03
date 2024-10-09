@@ -4,6 +4,7 @@ import { FaUser } from 'react-icons/fa';
 import useAuth from '../hooks/useAuth';
 import SignInForm from './auth/signinForm';
 import SignUpForm from './auth/signupForm';
+import InstallPwaButton from './installPwaButton';
 
 export default function Header() {
   const { user, signout } = useAuth();
@@ -17,6 +18,7 @@ export default function Header() {
 
   return (
     <header className="bg-orange-900 p-4 w-full flex justify-between items-center">
+      <InstallPwaButton />
       <h1 className="text-white font-bold">DigitizeMart.</h1>
       <div className="relative">
         <button onClick={toggleAuth} className="text-white">

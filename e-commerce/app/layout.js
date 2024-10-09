@@ -1,4 +1,6 @@
+'use client'
 import { Inter } from "next/font/google";
+import { useEffect } from "react";
 import Header from "./components/header";
 import "./globals.css";
 
@@ -24,7 +26,6 @@ export function getMetadata(productTitle) {
   };
 }
 
-
 /**
  * Root layout component that wraps the entire application.
  *
@@ -35,6 +36,26 @@ export function getMetadata(productTitle) {
  */
 export default function RootLayout({ children, productTitle = "", showHeader }) {
   const metadata = getMetadata(productTitle);
+
+  useEffect(() => {
+    // Check if the user is offline when the app loads
+    if (!navigator.onLine) {
+      alert('You are offline. Some features may not work.');
+    }
+
+    // Listen for online/offline events
+    const handleOnline = () => alert('You are back online! Refresh page to see content');
+    const handleOffline = () => alert('You are offline. Some features may not work.');
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Cleanup event listeners when the component is unmounted
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   return (
     <html lang="en" className="bg-white">
@@ -47,10 +68,11 @@ export default function RootLayout({ children, productTitle = "", showHeader }) 
         <link rel="manifest" href={metadata.manifest} />
       </head>
       <body className={inter.className}>
-        {showHeader && 
-        <Header />}
+        {showHeader && <Header />}
         {children}
       </body>
     </html>
   );
 }
+
+
