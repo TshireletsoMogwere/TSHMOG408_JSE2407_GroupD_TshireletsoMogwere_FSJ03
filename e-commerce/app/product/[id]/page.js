@@ -251,7 +251,7 @@ export default function ProductDetails({ params, searchParams }) {
     : [];
 
   return (
-    <RootLayout productTitle={product.title}>
+    <RootLayout productTitle={product.title} showHeader={false}>
       {/* Back button */}
       <div className="mt-5 ml-10 w-14">
         <Link href={{ pathname: "/", query: { ...searchParams } }}>
