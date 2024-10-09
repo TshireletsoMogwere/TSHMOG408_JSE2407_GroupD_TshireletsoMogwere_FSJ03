@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore,enableIndexedDbPersistence  } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth'; // Import Auth
+import { initializeApp } from "firebase/app";
+import { getFirestore, initializeFirestore } from "firebase/firestore"; // Updated import
+import { getAuth } from "firebase/auth"; // Import Auth
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,15 +11,31 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app); // Initialize Auth
 
-enableIndexedDbPersistence(db).catch((err) => {
-  if (err.code === 'failed-precondition') {
-    console.error('Multiple tabs open, offline data not available');
-  } else if (err.code === 'unimplemented') {
-    console.error('Browser does not support offline persistence');
-  }
+// Initialize Firestore with persistent cache
+const db = initializeFirestore(app, {
+  cache: 'persistent', // Use persistent cache
 });
-export { db, auth }
+
+// Initialize Auth
+const auth = getAuth(app);
+
+/**
+ * If you still want to use IndexedDB persistence (though it's deprecated), you can still use this.
+ * This function catches potential errors related to multiple tabs open or browser compatibility.
+ *
+ * @param {Object} db - The Firestore instance to enable persistence for.
+ * @returns {void}
+ */
+// Uncomment the following code if you still want to enable IndexedDB persistence
+// enableIndexedDbPersistence(db).catch((err) => {
+//   if (err.code === "failed-precondition") {
+//     console.error("Multiple tabs open, offline data not available");
+//   } else if (err.code === "unimplemented") {
+//     console.error("Browser does not support offline persistence");
+//   }
+// });
+
+export { db, auth };

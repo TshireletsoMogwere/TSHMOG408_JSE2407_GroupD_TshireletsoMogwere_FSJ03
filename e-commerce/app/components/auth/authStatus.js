@@ -1,4 +1,11 @@
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from "@/hooks/useAuth";
+
+/**
+* A functional component that displays the current user's status and provides a sign out button.
+* It uses the `useAuth` hook to get the current user and loading status.
+*
+* @returns {JSX.Element} - A JSX element displaying the user's status and a sign out button.
+*/
 
 const AuthStatus = () => {
   const { user, loading } = useAuth();
@@ -18,3 +25,4 @@ const AuthStatus = () => {
 };
 
 export default AuthStatus;
+

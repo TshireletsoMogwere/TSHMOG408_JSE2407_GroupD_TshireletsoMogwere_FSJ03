@@ -1,11 +1,9 @@
-// Create a new file named cors.js in your /lib directory
-
-import Cors from 'cors';
+import Cors from "cors";
 
 // Initialize the CORS middleware
 const cors = Cors({
-  methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE'], // Add any methods you need
-  origin: 'http://localhost:3000', // Replace this with your client URL
+  methods: ["GET", "HEAD", "POST", "PUT", "DELETE"],
+  origin: "http://localhost:3000",
 });
 
 // Helper method to wait for a middleware to execute before continuing

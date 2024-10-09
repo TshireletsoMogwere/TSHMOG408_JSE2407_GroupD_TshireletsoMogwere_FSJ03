@@ -1,16 +1,21 @@
-'use client'
-import { useState } from 'react';
-import { FaUser } from 'react-icons/fa';
-import useAuth from '../hooks/useAuth';
-import SignInForm from './auth/signinForm';
-import SignUpForm from './auth/signupForm';
-import InstallPwaButton from './installPwaButton';
-
+"use client";
+import { useState } from "react";
+import { FaUser } from "react-icons/fa";
+import useAuth from "../hooks/useAuth";
+import SignInForm from "./auth/signinForm";
+import SignUpForm from "./auth/signupForm";
+import InstallPwaButton from "./installPwaButton";
+/**
+ * Header component for the e-commerce application.
+ * Displays the application logo, user icon, and authentication forms.
+ *
+ * @returns {JSX.Element} - The Header component.
+ */
 export default function Header() {
   const { user, signout } = useAuth();
-  const [isAuthOpen, setIsAuthOpen] = useState(false); // State to toggle auth forms
+  const [isAuthOpen, setIsAuthOpen] = useState(false); 
 
-  const toggleAuth = () => setIsAuthOpen(!isAuthOpen); // Toggle auth forms visibility
+  const toggleAuth = () => setIsAuthOpen(!isAuthOpen); 
 
   const handleSignOut = async () => {
     await signout(); // Call signout from useAuth

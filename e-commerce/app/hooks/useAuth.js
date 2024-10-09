@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { auth } from '../lib/firebase';
 import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-
 const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -11,6 +10,7 @@ const useAuth = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
+
     });
 
     return () => unsubscribe();
@@ -52,3 +52,4 @@ const useAuth = () => {
 };
 
 export default useAuth;
+

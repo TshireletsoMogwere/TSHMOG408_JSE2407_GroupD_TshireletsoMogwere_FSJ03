@@ -3,6 +3,15 @@ import { db } from '@/app/lib/firebase';
 import { NextResponse } from 'next/server';
 import Fuse from 'fuse.js';
 
+/** 
+* Handles the GET request for fetching products from the database.
+* It supports pagination, filtering by category, sorting, and searching.
+*
+* @param {Request} request - The incoming request object.//+
+* @returns {Promise<Response>} - A Promise that resolves to a JSON response containing the paginated products.
+*
+* @throws Will throw an error if there's an issue fetching products from the database.
+*/
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -15,24 +24,24 @@ export async function GET(request) {
 
     let productsQuery = collection(db, 'products');
 
-    // Apply category filter if provided
+    {/**Apply category filter if provided */}
     if (category) {
       productsQuery = query(productsQuery, where('categoryId', '==', category));
     }
 
-    // Apply sorting only if sortBy and sortOrder are provided
+    {/**Apply sorting only if sortBy and sortOrder are provided */}
     if (sortBy && sortOrder) {
       productsQuery = query(productsQuery, orderBy(sortBy, sortOrder));
     }
 
-    // Fetch products
+    {/**Fetch products */}
     const allProductsSnapshot = await getDocs(productsQuery);
     const allProducts = allProductsSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
 
-    // Use Fuse.js for searching
+    {/**Use Fuse.js for searching */}
     let products = allProducts;
     if (search) {
       const fuse = new Fuse(allProducts, {
@@ -43,11 +52,11 @@ export async function GET(request) {
       products = searchResults.map(result => result.item);
     }
 
-    // Pagination logic
+    {/** Pagination logic */}
     const startIndex = (page - 1) * pageSize;
     const paginatedProducts = products.slice(startIndex, startIndex + pageSize);
 
-    // Determine if there are more products
+    {/**Determine if there are more products */}
     const hasMore = paginatedProducts.length === pageSize;
 
     return NextResponse.json({
@@ -62,3 +71,4 @@ export async function GET(request) {
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
   }
 }
+

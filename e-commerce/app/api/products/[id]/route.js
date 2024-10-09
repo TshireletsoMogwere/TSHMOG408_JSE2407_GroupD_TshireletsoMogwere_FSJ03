@@ -12,32 +12,23 @@ import { doc, getDoc } from "firebase/firestore";
  * @throws Will throw an error if fetching the product fails or the product is not found.
  */
 
-export async function GET(req, {params}) {
+export async function GET(req, { params }) {
   try {
     let { id } = params;
-   
 
     // Pad the ID with leading zeros if necessary
-    id = id.padStart(3, '0');
-    
+    id = id.padStart(3, "0");
 
     const productRef = doc(db, "products", id);
     const productSnap = await getDoc(productRef);
 
-    
-    
     if (!productSnap.exists()) {
-      
-      return NextResponse.json(
-        { error: "Product not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
     const productData = productSnap.data();
 
     if (!productData) {
-
       return NextResponse.json(
         { error: "Product exists but has no data" },
         { status: 500 }
@@ -48,8 +39,6 @@ export async function GET(req, {params}) {
       id: productSnap.id,
       ...productData,
     };
-
-   
 
     return NextResponse.json(product);
   } catch (error) {
