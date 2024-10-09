@@ -198,8 +198,6 @@
 //   );
 // }
 
-
-
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
@@ -211,35 +209,46 @@ import { fetchProductById } from "@/app/components/FetchProducts";
 
 export default function ProductDetails({ params, searchParams }) {
   const { id } = params;
-  const [product, setProduct] = useState(null);
+  console.log(params); // Log the params to see if id is present
+
+  const [product, setProduct] = useState({}); // Initialize as an empty object
   const [sortCriteria, setSortCriteria] = useState("date"); // default sort by date
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
-      try {
-        const productData = await fetchProductById(id); // Use the imported function
-        setProduct(productData);
-      } catch (err) {
-        console.error("Failed to fetch product details", err);
+      if (!id) {
+          console.error("Product ID is not available");
+          return;
       }
-    };
-
+      try {
+          const productData = await fetchProductById(id);
+          setProduct(productData);
+      } catch (err) {
+          console.error("Failed to fetch product details", err);
+          setError("Failed to fetch product details. Please try again later.");
+      }
+  };
+  
+  
     fetchProduct();
   }, [id]);
-
-  if (!product) {
-    return <p className="text-red-500 text-center text-xl mt-8">Loading...</p>;
+  
+  if (error) {
+    return <p className="text-red-500 text-center text-xl mt-8">{error}</p>;
   }
 
   // Sort reviews based on the selected criteria
-  const sortedReviews = [...(product.reviews || [])].sort((a, b) => {
-    if (sortCriteria === "date") {
-      return new Date(b.date) - new Date(a.date); // most recent first
-    } else if (sortCriteria === "rating") {
-      return b.rating - a.rating; // highest rating first
-    }
-    return 0; // default case
-  });
+  const sortedReviews = product.reviews 
+    ? [...product.reviews].sort((a, b) => {
+        if (sortCriteria === "date") {
+          return new Date(b.date) - new Date(a.date); // most recent first
+        } else if (sortCriteria === "rating") {
+          return b.rating - a.rating; // highest rating first
+        }
+        return 0; // default case
+      })
+    : [];
 
   return (
     <RootLayout productTitle={product.title}>
@@ -286,7 +295,7 @@ export default function ProductDetails({ params, searchParams }) {
 
             {/* Price */}
             <p className="text-2xl text-orange-600 font-bold mb-4">
-              €{product.price.toFixed(2)}
+              €{product.price?.toFixed(2)}
             </p>
 
             {/* Description */}

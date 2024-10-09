@@ -231,11 +231,7 @@ export default function Home() {
               <h2 className="text-lg font-bold">{product.title}</h2>
               <div className="text-md text-orange-600 font-semibold mt-2 flex items-center justify-between">
                 <span>€{product.price}</span>
-                <Link
-                  href={{
-                    pathname: `/product/${product.id}`,
-                  }}
-                >
+                <Link href={`/product/${product.id}`}>
                   <Image src={Info} alt="info" className="w-6" />
                 </Link>
               </div>
