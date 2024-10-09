@@ -91,3 +91,6 @@ If you would like to contribute to the project, please follow these steps:
 **Contact**
 Email: [tmogwere09@gmail.com](mailto:tmogwere09@gmail.com)
 Github: [TshireletsoMogwere](https://github.com/TshireletsoMogwere)
+
+# Link to hosted project: 
+[https://digitizemart2.vercel.app/]
