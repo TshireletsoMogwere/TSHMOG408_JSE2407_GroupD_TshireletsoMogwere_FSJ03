@@ -9,8 +9,8 @@ export async function GET(request) {
     const page = parseInt(searchParams.get('page')) || 1;
     const pageSize = parseInt(searchParams.get('pageSize')) || 10;
     const category = searchParams.get('category');
-    const sortBy = searchParams.get('sortBy'); // No default
-    const sortOrder = searchParams.get('sortOrder'); // No default
+    const sortBy = searchParams.get('sortBy'); 
+    const sortOrder = searchParams.get('sortOrder'); 
     const search = searchParams.get('search') || '';
 
     let productsQuery = collection(db, 'products');

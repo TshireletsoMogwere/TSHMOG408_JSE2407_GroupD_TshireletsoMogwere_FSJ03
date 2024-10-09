@@ -22,6 +22,7 @@
     "sharp": "^0.33.5"
   },
   "devDependencies": {
+    "@types/next-pwa": "^5.6.9",
     "eslint": "^8",
     "eslint-config-next": "14.2.8",
     "postcss": "^8",

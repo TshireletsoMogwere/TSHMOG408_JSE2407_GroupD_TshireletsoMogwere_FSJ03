@@ -105,6 +105,7 @@
 // };
 
 // export default Home;
+
 'use client';
 import { useEffect, useState } from 'react';
 import ImageCarousel from './components/imageCarousel';
@@ -112,6 +113,7 @@ import Info from "../app/assets/info.png";
 import Link from 'next/link';
 import Image from 'next/image';
 import SkeletonLoader from './components/productsSkeleton'; // Import your Skeleton Loader
+import { fetchCategories, fetchProducts } from '../app/components/FetchProducts'; // Import fetch functions
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -126,35 +128,30 @@ export default function Home() {
   const [loading, setLoading] = useState(true); // New loading state
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const loadCategories = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/categories');
-        if (!res.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await res.json();
+        const data = await fetchCategories();
         setCategories(data);
       } catch (error) {
         console.error('Failed to fetch categories:', error);
       }
     };
-    fetchCategories();
+    loadCategories();
   }, []);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const loadProducts = async () => {
       setLoading(true); // Set loading to true before fetching
-      const params = new URLSearchParams({
+      const params = {
         page,
         pageSize,
         search: searchTerm,
         category: selectedCategory,
         ...(sortOrder && { sortBy: 'price', sortOrder }),
-      }).toString();
+      };
 
       try {
-        const res = await fetch(`http://localhost:3000/api/products?${params}`);
-        const data = await res.json();
+        const data = await fetchProducts(params);
         setProducts(data.products);
         setTotalProducts(data.total);
         setHasMore(data.hasMore);
@@ -165,7 +162,7 @@ export default function Home() {
       }
     };
 
-    fetchProducts();
+    loadProducts();
   }, [page, searchTerm, selectedCategory, sortOrder, pageSize]);
 
   const totalPages = Math.ceil(totalProducts / pageSize);
@@ -191,9 +188,7 @@ export default function Home() {
   };
 
   return (
-    <div>
-      <h1>Product Store</h1>
-
+    <div className='mt-20'>
       <input
         type="text"
         value={searchTerm}
